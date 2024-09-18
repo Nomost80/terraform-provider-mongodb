@@ -185,9 +185,10 @@ func (r *indexResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 			"background": schema.BoolAttribute{
 				Description: "Create the index in the background.",
 				Optional:    true,
+				// This field has no effect when the resource is already created so we ignore it to avoid unecessary recreate
 				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.RequiresReplace(),
-				},
+					boolplanmodifier.UseStateForUnknown(), // Use the existing state to suppress diffs
+				},		
 			},
 			"collation": schema.SingleNestedAttribute{
 				Description: "Index collation.",
