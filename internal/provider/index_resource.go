@@ -436,7 +436,6 @@ func (r *indexResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	state.ExpireAfterSeconds = foundIndex.ExpireAfterSeconds
 	state.Unique = foundIndex.Unique
 	state.Id = types.StringValue("to_be_ignored")
-	state.Background = foundIndex.Background
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)

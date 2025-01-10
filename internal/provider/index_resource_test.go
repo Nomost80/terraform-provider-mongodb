@@ -47,6 +47,7 @@ resource "mongodb_index" "acc_test" {
 				ImportStateId:     "test.test.tf_acc_test",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"background"}, // because not exported by mongo api
 			},
 						// Test Diff Suppression
 			{
