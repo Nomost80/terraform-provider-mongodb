@@ -185,10 +185,11 @@ func (r *indexResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 			"background": schema.BoolAttribute{
 				Description: "Create the index in the background.",
 				Optional:    true,
-				// This field has no effect when the resource is already created so we ignore it to avoid unecessary recreate
+				// This field has no effect when the resource is already created or when an index is
+				// created since Mongo 4.4 so we ignore it to avoid unecessary recreate
 				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(), // Use the existing state to suppress diffs
-				},		
+					suppressBackgroundDiff{}, // Use the custom plan modifier here
+				},
 			},
 			"collation": schema.SingleNestedAttribute{
 				Description: "Index collation.",
@@ -269,6 +270,31 @@ func (r *indexResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 			},
 		},
 	}
+}
+
+type suppressBackgroundDiff struct{}
+
+// https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#creating-attribute-plan-modifiers
+func (m suppressBackgroundDiff) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
+    // Do nothing if there is no state value.
+    if req.StateValue.IsNull() {
+        return
+    }
+
+    // Do nothing if there is an unknown configuration value, otherwise interpolation gets messed up.
+    if req.ConfigValue.IsUnknown() {
+        return
+    }
+
+    resp.PlanValue = req.StateValue
+}
+
+func (m suppressBackgroundDiff) Description(ctx context.Context) string {
+	return "Suppress diffs for the background attribute after the resource is created."
+}
+
+func (m suppressBackgroundDiff) MarkdownDescription(ctx context.Context) string {
+	return "Suppress diffs for the background attribute after the resource is created."
 }
 
 // Create creates the resource and sets the initial Terraform state.
