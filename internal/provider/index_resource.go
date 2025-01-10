@@ -282,16 +282,7 @@ type suppressBackgroundDiff struct{}
 
 // https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#creating-attribute-plan-modifiers
 func (m suppressBackgroundDiff) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
-    // Do nothing if there is no state value.
-    if req.StateValue.IsNull() {
-        return
-    }
-
-    // Do nothing if there is an unknown configuration value, otherwise interpolation gets messed up.
-    if req.ConfigValue.IsUnknown() {
-        return
-    }
-
+	// Suppress diff for the background attribute
     resp.PlanValue = req.StateValue
 }
 
