@@ -33,12 +33,12 @@ resource "mongodb_index" "acc_test" {
 					resource.TestCheckResourceAttr("mongodb_index.acc_test", "name", "tf_acc_test"),
 					resource.TestCheckResourceAttr("mongodb_index.acc_test", "keys.0.field", "field1"),
 					resource.TestCheckResourceAttr("mongodb_index.acc_test", "keys.0.type", "asc"),
+					resource.TestCheckResourceAttr("mongodb_index.acc_test", "background", "true"),
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "sparse"),
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "expire_after_seconds"),
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "unique"),
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "wildcard_projection"),
-					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "collation"),
-					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "background"),
+					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "collation")
 				),
 			},
 			// ImportState testing
@@ -101,12 +101,12 @@ resource "mongodb_index" "acc_test" {
 					resource.TestCheckResourceAttr("mongodb_index.acc_test", "keys.0.type", "asc"),
 					resource.TestCheckResourceAttr("mongodb_index.acc_test", "keys.1.field", "field2"),
 					resource.TestCheckResourceAttr("mongodb_index.acc_test", "keys.1.type", "desc"),
+					resource.TestCheckResourceAttr("mongodb_index.acc_test", "background", "true"), // Ensure original value is retained
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "sparse"),
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "expire_after_seconds"),
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "unique"),
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "wildcard_projection"),
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "collation"),
-					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "background"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
