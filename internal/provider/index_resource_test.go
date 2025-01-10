@@ -23,7 +23,6 @@ resource "mongodb_index" "acc_test" {
       "type" : "asc"
     }
   ]
-  background = true
 }
 `,
 				Check: resource.ComposeAggregateTestCheckFunc(
@@ -33,7 +32,6 @@ resource "mongodb_index" "acc_test" {
 					resource.TestCheckResourceAttr("mongodb_index.acc_test", "name", "tf_acc_test"),
 					resource.TestCheckResourceAttr("mongodb_index.acc_test", "keys.0.field", "field1"),
 					resource.TestCheckResourceAttr("mongodb_index.acc_test", "keys.0.type", "asc"),
-					resource.TestCheckResourceAttr("mongodb_index.acc_test", "background", "true"),
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "sparse"),
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "expire_after_seconds"),
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "unique"),
@@ -47,32 +45,6 @@ resource "mongodb_index" "acc_test" {
 				ImportStateId:     "test.test.tf_acc_test",
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-						// Test Diff Suppression
-			{
-				Config: providerConfig + `
-resource "mongodb_index" "acc_test" {
-	database   = "test"
-	collection = "test"
-	name       = "tf_acc_test"
-	keys = [
-	{
-		"field" : "field1"
-		"type" : "asc"
-	}
-	]
-	background = false
-}
-`,
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("mongodb_index.acc_test", "database", "test"),
-					resource.TestCheckResourceAttr("mongodb_index.acc_test", "collection", "test"),
-					resource.TestCheckResourceAttr("mongodb_index.acc_test", "name", "tf_acc_test"),
-					resource.TestCheckResourceAttr("mongodb_index.acc_test", "keys.0.field", "field1"),
-					resource.TestCheckResourceAttr("mongodb_index.acc_test", "keys.0.type", "asc"),
-					resource.TestCheckResourceAttr("mongodb_index.acc_test", "background", "true"), // Ensure original value is retained
-				),
-				ExpectNonEmptyPlan: false, // Ensure no diff is detected
 			},
 			// Replace and Read testing
 			{
@@ -101,7 +73,6 @@ resource "mongodb_index" "acc_test" {
 					resource.TestCheckResourceAttr("mongodb_index.acc_test", "keys.0.type", "asc"),
 					resource.TestCheckResourceAttr("mongodb_index.acc_test", "keys.1.field", "field2"),
 					resource.TestCheckResourceAttr("mongodb_index.acc_test", "keys.1.type", "desc"),
-					resource.TestCheckResourceAttr("mongodb_index.acc_test", "background", "true"), // Ensure original value is retained
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "sparse"),
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "expire_after_seconds"),
 					resource.TestCheckNoResourceAttr("mongodb_index.acc_test", "unique"),

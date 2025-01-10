@@ -48,7 +48,6 @@ type indexResourceModel struct {
 	Unique             *bool             `tfsdk:"unique"`
 	WildcardProjection *map[string]int32 `tfsdk:"wildcard_projection"`
 	Collation          *collation        `tfsdk:"collation"`
-	Background         *bool             `tfsdk:"background"`
 
 	// see https://developer.hashicorp.com/terraform/plugin/framework/acctests#implement-id-attribute
 	Id types.String `tfsdk:"id"`
@@ -182,16 +181,6 @@ func (r *indexResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 					mapplanmodifier.RequiresReplace(),
 				},
 			},
-			"background": schema.BoolAttribute{
-				Description: "Create the index in the background.",
-				Optional:    true,
-				Computed:    true,
-				// This field has no effect when the resource is already created or when an index is
-				// created since Mongo 4.4 so we ignore it to avoid unecessary recreate
-				PlanModifiers: []planmodifier.Bool{
-					suppressBackgroundDiff{}, // Use the custom plan modifier here
-				},
-			},
 			"collation": schema.SingleNestedAttribute{
 				Description: "Index collation.",
 				Optional:    true,
@@ -273,27 +262,6 @@ func (r *indexResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 	}
 }
 
-func newTrue() *bool {
-    b := true
-    return &b
-}
-
-type suppressBackgroundDiff struct{}
-
-// https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#creating-attribute-plan-modifiers
-func (m suppressBackgroundDiff) PlanModifyBool(ctx context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
-	// Suppress diff for the background attribute
-    resp.PlanValue = req.StateValue
-}
-
-func (m suppressBackgroundDiff) Description(ctx context.Context) string {
-	return "Suppress diffs for the background attribute after the resource is created."
-}
-
-func (m suppressBackgroundDiff) MarkdownDescription(ctx context.Context) string {
-	return "Suppress diffs for the background attribute after the resource is created."
-}
-
 // Create creates the resource and sets the initial Terraform state.
 func (r *indexResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
@@ -324,7 +292,6 @@ func (r *indexResource) Create(ctx context.Context, req resource.CreateRequest, 
 		ExpireAfterSeconds: plan.ExpireAfterSeconds,
 		Unique:             plan.Unique,
 		Collation:          plan.Collation.toMongoCollation(),
-		Background:         plan.Background,
 	}
 	if plan.WildcardProjection != nil {
 		options.WildcardProjection = plan.WildcardProjection
@@ -432,7 +399,6 @@ func (r *indexResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	state.ExpireAfterSeconds = foundIndex.ExpireAfterSeconds
 	state.Unique = foundIndex.Unique
 	state.Id = types.StringValue("to_be_ignored")
-	state.Background = newTrue()// Index are created by default in the background and this field is not exposed by mongo api
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
