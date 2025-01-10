@@ -48,7 +48,7 @@ type indexResourceModel struct {
 	Unique             *bool             `tfsdk:"unique"`
 	WildcardProjection *map[string]int32 `tfsdk:"wildcard_projection"`
 	Collation          *collation        `tfsdk:"collation"`
-	Background         bool             `tfsdk:"background"`
+	Background         *bool             `tfsdk:"background"`
 
 	// see https://developer.hashicorp.com/terraform/plugin/framework/acctests#implement-id-attribute
 	Id types.String `tfsdk:"id"`
@@ -273,6 +273,11 @@ func (r *indexResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 	}
 }
 
+func newTrue() *bool {
+    b := true
+    return &b
+}
+
 type suppressBackgroundDiff struct{}
 
 // https://developer.hashicorp.com/terraform/plugin/framework/resources/plan-modification#creating-attribute-plan-modifiers
@@ -436,7 +441,7 @@ func (r *indexResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	state.ExpireAfterSeconds = foundIndex.ExpireAfterSeconds
 	state.Unique = foundIndex.Unique
 	state.Id = types.StringValue("to_be_ignored")
-	state.Background = true // Index are created by default in the background and this field is not exposed by mongo api
+	state.Background = newTrue()// Index are created by default in the background and this field is not exposed by mongo api
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
