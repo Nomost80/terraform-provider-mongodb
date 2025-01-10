@@ -436,6 +436,7 @@ func (r *indexResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	state.ExpireAfterSeconds = foundIndex.ExpireAfterSeconds
 	state.Unique = foundIndex.Unique
 	state.Id = types.StringValue("to_be_ignored")
+	state.Background = true // Index are created by default in the background and this field is not exposed by mongo api
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
