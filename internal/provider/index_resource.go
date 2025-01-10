@@ -185,6 +185,7 @@ func (r *indexResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 			"background": schema.BoolAttribute{
 				Description: "Create the index in the background.",
 				Optional:    true,
+				Computed:    true,
 				// This field has no effect when the resource is already created or when an index is
 				// created since Mongo 4.4 so we ignore it to avoid unecessary recreate
 				PlanModifiers: []planmodifier.Bool{
@@ -435,6 +436,7 @@ func (r *indexResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	state.ExpireAfterSeconds = foundIndex.ExpireAfterSeconds
 	state.Unique = foundIndex.Unique
 	state.Id = types.StringValue("to_be_ignored")
+	state.Background = foundIndex.Background
 
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
